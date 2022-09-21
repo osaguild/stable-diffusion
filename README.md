@@ -1,9 +1,17 @@
 # Apple Silicon Mac Users
 
-## [memo] added by osaguild
+## Quick run!
 
-- set up guide is [here](https://replicate.com/blog/run-stable-diffusion-on-m1-mac)  
-- 
+- `source venv/bin/activate`
+- `pip install -r requirements.txt`
+- ```
+  python scripts/txt2img.py \
+    --prompt "a red juicy apple floating in outer space, like a planet" \
+    --n_samples 1 --n_iter 1 --plms
+  ```
+
+## Rarated link
+- set up guide is [here](https://replicate.com/blog/run-stable-diffusion-on-m1-mac)
 
 ---
 
@@ -18,6 +26,7 @@ BTW, I haven't tested any of this on Intel Macs.
 How to:
 
 ```
+
 git clone https://github.com/magnusviri/stable-diffusion.git
 cd stable-diffusion
 git checkout apple-silicon-mps-support
@@ -27,6 +36,7 @@ ln -s /path/to/ckpt/sd-v1-1.ckpt models/ldm/stable-diffusion-v1/model.ckpt
 
 conda env create -f environment-mac.yaml
 conda activate ldm
+
 ```
 
 These instructions are identical to the main repo except I added environment-mac.yaml because Mac doesn't have cudatoolkit.
@@ -57,8 +67,10 @@ You might also need to install Rust (I mention this again below).
 Example error.
 
 ```
+
 ...
 NotImplementedError: The operator 'aten::index.Tensor' is not current implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on [https://github.com/pytorch/pytorch/issues/77764](https://github.com/pytorch/pytorch/issues/77764). As a temporary fix, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.
+
 ```
 
 Just do what it says:
@@ -120,9 +132,11 @@ I haven't solved this issue. I just throw away my black images. There's a [simil
 ### "view size is not compatible with input tensor's size and stride"
 
 ```
-  File "/opt/anaconda3/envs/ldm/lib/python3.10/site-packages/torch/nn/functional.py", line 2511, in layer_norm
-    return torch.layer_norm(input, normalized_shape, weight, bias, eps, torch.backends.cudnn.enabled)
+
+File "/opt/anaconda3/envs/ldm/lib/python3.10/site-packages/torch/nn/functional.py", line 2511, in layer_norm
+return torch.layer_norm(input, normalized_shape, weight, bias, eps, torch.backends.cudnn.enabled)
 RuntimeError: view size is not compatible with input tensor's size and stride (at least one dimension spans across two contiguous subspaces). Use .reshape(...) instead.
+
 ```
 
 Update to the latest version of magnusviri/stable-diffusion. We were patching pytorch but we found a file in stable-diffusion that we could change instead. This is a 32-bit vs 16-bit problem.
@@ -165,16 +179,20 @@ A suitable [conda](https://conda.io/) environment named `ldm` can be created
 and activated with:
 
 ```
+
 conda env create -f environment.yaml
 conda activate ldm
+
 ```
 
 You can also update an existing [latent diffusion](https://github.com/CompVis/latent-diffusion) environment by running
 
 ```
+
 conda install pytorch torchvision -c pytorch
 pip install transformers==4.19.2 diffusers invisible-watermark
 pip install -e .
+
 ```
 
 ## Stable Diffusion v1
@@ -231,15 +249,19 @@ We provide a reference sampling script, which incorporates
 After [obtaining the `stable-diffusion-v1-*-original` weights](#weights), link them
 
 ```
+
 mkdir -p models/ldm/stable-diffusion-v1/
 ln -s <path/to/model.ckpt> models/ldm/stable-diffusion-v1/model.ckpt
+
 ```
 
 and sample with
 
 ```
+
 python scripts/txt2img.py --prompt "a photograph of an astronaut riding a horse" --plms
-```
+
+````
 
 By default, this uses a guidance scale of `--scale 7.5`, [Katherine Crowson's implementation](https://github.com/CompVis/latent-diffusion/pull/51) of the [PLMS](https://arxiv.org/abs/2202.09778) sampler,
 and renders images of size 512x512 (which it was trained on) in 50 steps. All supported arguments are listed below (type `python scripts/txt2img.py --help`).
@@ -277,7 +299,7 @@ optional arguments:
   --seed SEED           the seed (for reproducible sampling)
   --precision {full,autocast}
                         evaluate at this precision
-```
+````
 
 Note: The inference config for all v1 versions is designed to be used with EMA-only checkpoints.
 For this reason `use_ema=False` is set in the configuration, otherwise the code will try to switch from
